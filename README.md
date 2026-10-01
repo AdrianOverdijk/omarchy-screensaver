@@ -1,4 +1,4 @@
-# Screensaver (Omarchy bar widget)
+# Screensaver with coffee (Omarchy bar widget)
 
 Shows when the screensaver starts and when the screen locks, and lets you
 change both from the bar. It doubles as a **caffeine** toggle: switch on stay
