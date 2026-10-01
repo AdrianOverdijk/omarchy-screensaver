@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "io.github.adrianoverdijk.screensaver",
-  "name": "Screensaver",
+  "name": "Screensaver with coffee",
   "version": "1.1.0",
   "author": "Adrian Overdijk",
   "license": "MIT",
-  "description": "Screensaver and lock timing in the bar, a stay-awake (caffeine) toggle, and a custom screensaver word in the Omarchy logo lettering.",
+  "description": "Screensaver and lock timing in your bar, a coffee (stay-awake) toggle, and your own text on the screensaver in the Omarchy logo lettering.",
   "kinds": [
     "bar-widget"
   ],
@@ -13,7 +13,7 @@
     "barWidget": "Widget.qml"
   },
   "barWidget": {
-    "displayName": "Screensaver",
+    "displayName": "Screensaver with coffee",
     "description": "Screensaver and lock timing at a glance; click to adjust",
     "category": "System",
     "allowMultiple": false,
