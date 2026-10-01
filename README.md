@@ -3,6 +3,11 @@
 Shows when the screensaver starts and when the screen locks, and lets you
 change both from the bar.
 
+<p>
+  <img src="screenshots/popup.png" alt="The Screensaver popup under the bar icon" width="427">
+  <img src="screenshots/screensaver.png" alt="A custom screensaver word in the Omarchy logo lettering" width="380">
+</p>
+
 - **Left click**: popup with −/+ for "Screensaver after" and "Lock after",
   Preview, Stay awake, and Defaults (2:30 / 5:00).
 - **Screensaver text**: type a word and press Enter (or Apply) to show it on
