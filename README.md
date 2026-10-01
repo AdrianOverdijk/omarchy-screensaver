@@ -1,7 +1,8 @@
 # Screensaver (Omarchy bar widget)
 
 Shows when the screensaver starts and when the screen locks, and lets you
-change both from the bar.
+change both from the bar. It doubles as a **caffeine** toggle: switch on stay
+awake and neither the screensaver nor the lock kicks in until you switch it off.
 
 <p>
   <img src="screenshots/popup.png" alt="The Screensaver popup under the bar icon" width="427">
@@ -9,11 +10,15 @@ change both from the bar.
 </p>
 
 - **Left click**: popup with −/+ for "Screensaver after" and "Lock after",
-  Preview, Stay awake, and Defaults (2:30 / 5:00).
+  Stay awake, Preview, and Defaults (2:30 / 5:00).
 - **Screensaver text**: type a word and press Enter (or Apply) to show it on
   the screensaver instead of the logo, in the same lettering as the Omarchy
   logo. **Logo** puts the stock logo back.
-- **Right click**: toggle stay-awake (icon turns into a coffee cup).
+- **Caffeine (stay awake)**: right-click the icon, or use the **Stay awake**
+  button in the popup. The icon turns into a coffee cup while it's on, and both
+  timers are paused. It uses Omarchy's own stay-awake setting, so it stays in
+  sync with `omarchy toggle idle` and the bar's stay-awake indicator. No
+  separate caffeine widget needed.
 - **Hover**: current timings.
 
 Changes are written to `idle.screensaver` / `idle.lock` in
