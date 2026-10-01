@@ -46,3 +46,8 @@ follow the symlink, and `rescanPlugins` can keep a cached copy); run
 `fonts/DeltaCorpsPriest1.flf` is the FIGlet font *Delta Corps Priest 1* by
 CoSMiC cHiLD, from the [xero/figlet-fonts](https://github.com/xero/figlet-fonts)
 collection. The Omarchy logo lettering comes from [Omarchy](https://omarchy.org/).
+
+## License
+
+MIT — see [LICENSE](LICENSE). This covers the plugin's own code; the bundled
+font stays under its author's terms.
