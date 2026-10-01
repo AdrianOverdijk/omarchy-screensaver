@@ -9,6 +9,16 @@ awake and neither the screensaver nor the lock kicks in until you switch it off.
   <img src="screenshots/screensaver.png" alt="A custom screensaver word in the Omarchy logo lettering" width="380">
 </p>
 
+## Install
+
+```sh
+omarchy plugin add https://github.com/AdrianOverdijk/omarchy-screensaver.git --enable
+```
+
+The widget lands in the right section of the bar.
+
+## Usage
+
 - **Left click**: popup with −/+ for "Screensaver after" and "Lock after",
   Stay awake, Preview, and Defaults (2:30 / 5:00).
 - **Screensaver text**: type a word and press Enter (or Apply) to show it on
@@ -20,10 +30,40 @@ awake and neither the screensaver nor the lock kicks in until you switch it off.
   sync with `omarchy toggle idle` and the bar's stay-awake indicator. No
   separate caffeine widget needed.
 - **Hover**: current timings.
+- **Escape** or a click outside closes the popup.
 
 Changes are written to `idle.screensaver` / `idle.lock` in
 `~/.config/omarchy/shell.json` by `bin/set-idle` (atomic replace, nothing else
 in the file is touched). The lock is never allowed before the screensaver.
+
+## Configure
+
+Move the widget to another part of the bar:
+
+```sh
+omarchy bar move io.github.adrianoverdijk.screensaver --section center
+```
+
+Open, close or toggle the popup from a terminal or a keybinding:
+
+```sh
+omarchy-shell shell toggle io.github.adrianoverdijk.screensaver '{}'
+omarchy-shell shell summon io.github.adrianoverdijk.screensaver '{}'
+omarchy-shell shell hide io.github.adrianoverdijk.screensaver
+```
+
+The timings live in `~/.config/omarchy/shell.json` (`idle.screensaver` and
+`idle.lock`, in seconds), so editing them there works too. The screensaver
+word can also be set from a terminal; see [Screensaver lettering](#screensaver-lettering).
+
+## Remove
+
+```sh
+omarchy plugin remove io.github.adrianoverdijk.screensaver
+```
+
+Removing the widget leaves your timings, stay-awake state and screensaver word
+as they are. Run `omarchy branding screensaver reset` to put the stock logo back.
 
 ## How caffeine works
 
@@ -52,27 +92,35 @@ Only what Omarchy already ships: `omarchy-shell`, `omarchy-toggle-idle`,
 
 `bin/render-word` draws text in the Omarchy logo's lettering: a narrowed cut of
 the FIGlet font *Delta Corps Priest 1* (`fonts/DeltaCorpsPriest1.flf`), with
-M, A, R, C, H and Y taken straight from `$OMARCHY_PATH/logo.txt`. Rendering
+M, A, R, C, H and Y taken straight from `$OMARCHY_PATH/logo.txt` and T, N, J and
+P redrawn by hand to match. Rendering
 `omarchy` reproduces the logo exactly. Only A–Z exist in the font; other
 characters are dropped. Long text is split one word per line.
 
 `bin/set-word` writes the result to `~/.config/omarchy/branding/screensaver.txt`
 (the file `omarchy branding screensaver` also edits) and remembers the word in
-`~/.local/state/omarchy/adrian.screensaver/word`.
+`~/.local/state/omarchy/io.github.adrianoverdijk.screensaver/word`.
 
     bin/render-word "be right back"     # print it
     bin/set-word "be right back"        # use it
     bin/set-word --reset                # back to the logo
 
-## Install
+## Development
 
-    ln -sfn ~/Work/screensaver ~/.config/omarchy/plugins/adrian.screensaver
-    omarchy-shell shell rescanPlugins
-    omarchy plugin enable adrian.screensaver
+`omarchy plugin add` installs a git checkout in
+`~/.config/omarchy/plugins/io.github.adrianoverdijk.screensaver/`; work in that folder and push from there.
+Don't symlink a working copy into the plugins folder: `omarchy plugin validate`
+rejects symlinked plugin folders.
 
-Edits here aren't reliably picked up by the hot-reload watcher (it doesn't
-follow the symlink, and `rescanPlugins` can keep a cached copy); run
-`omarchy restart shell` after saving.
+```sh
+omarchy plugin validate ~/.config/omarchy/plugins/io.github.adrianoverdijk.screensaver
+qmllint -I "$OMARCHY_PATH/shell" ~/.config/omarchy/plugins/io.github.adrianoverdijk.screensaver/Widget.qml
+```
+
+Edits aren't always picked up by the hot-reload watcher (`rescanPlugins` can
+keep a cached copy); run `omarchy restart shell` after saving. qmllint reports
+unresolved `qs.*` imports and `Style`/`Color` as unqualified; that's expected
+outside the running shell.
 
 ## Credits
 

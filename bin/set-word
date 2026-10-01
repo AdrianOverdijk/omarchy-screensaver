@@ -8,7 +8,7 @@ set -euo pipefail
 
 here=$(dirname "$(readlink -f "$0")")
 target="$HOME/.config/omarchy/branding/screensaver.txt"
-state_dir="$HOME/.local/state/omarchy/adrian.screensaver"
+state_dir="$HOME/.local/state/omarchy/io.github.adrianoverdijk.screensaver"
 state="$state_dir/word"
 
 mkdir -p "$(dirname "$target")" "$state_dir"

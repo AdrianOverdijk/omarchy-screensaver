@@ -1,12 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "adrian.screensaver",
+  "id": "io.github.adrianoverdijk.screensaver",
   "name": "Screensaver",
-  "version": "1.0.0",
-  "author": "adrian",
-  "description": "Shows and adjusts when the screensaver starts and when the screen locks.",
-  "kinds": ["bar-widget"],
-  "entryPoints": { "barWidget": "Widget.qml" },
+  "version": "1.1.0",
+  "author": "Adrian Overdijk",
+  "license": "MIT",
+  "description": "Screensaver and lock timing in the bar, a stay-awake (caffeine) toggle, and a custom screensaver word in the Omarchy logo lettering.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
   "barWidget": {
     "displayName": "Screensaver",
     "description": "Screensaver and lock timing at a glance; click to adjust",

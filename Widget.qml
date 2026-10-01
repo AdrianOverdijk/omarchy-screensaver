@@ -6,7 +6,7 @@ import qs.Ui
 
 BarWidget {
   id: root
-  moduleName: "adrian.screensaver"
+  moduleName: "io.github.adrianoverdijk.screensaver"
 
   readonly property string home: Quickshell.env("HOME")
   readonly property string shellConfigPath: home + "/.config/omarchy/shell.json"
@@ -49,8 +49,20 @@ BarWidget {
   readonly property color popupText: Color.popups.text
   readonly property color popupMuted: Qt.darker(popupText, 1.4)
 
+  // Shape the shell's summon/hide/toggle routing looks for on a bar widget,
+  // so `omarchy-shell shell toggle <id>` (and keybindings) can drive the popup.
+  readonly property bool opened: popupOpen
+
+  function open() {
+    popupOpen = true
+  }
+
   function close() {
     popupOpen = false
+  }
+
+  function togglePanel() {
+    popupOpen = !popupOpen
   }
 
   function formatDuration(seconds) {
@@ -169,7 +181,7 @@ BarWidget {
   Process {
     id: writeProc
     stderr: StdioCollector {
-      onStreamFinished: if (text.trim() !== "") console.warn("adrian.screensaver: " + text.trim())
+      onStreamFinished: if (text.trim() !== "") console.warn("io.github.adrianoverdijk.screensaver: " + text.trim())
     }
     onExited: configFile.reload()
   }
@@ -194,7 +206,7 @@ BarWidget {
   // The custom word shown by the screensaver, drawn in the logo's lettering.
   // set-word renders it into ~/.config/omarchy/branding/screensaver.txt and
   // remembers it here; no file means the stock logo is showing.
-  readonly property string wordStatePath: home + "/.local/state/omarchy/adrian.screensaver/word"
+  readonly property string wordStatePath: home + "/.local/state/omarchy/io.github.adrianoverdijk.screensaver/word"
   property string word: ""
   property string wordMessage: ""
   property bool wordError: false
