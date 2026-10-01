@@ -1,0 +1,24 @@
+#!/bin/bash
+# Put a word on the screensaver in the Omarchy logo lettering, or restore the logo.
+#
+# Usage: set-word <text>     render <text> into the screensaver
+#        set-word --reset    put the stock Omarchy logo back
+
+set -euo pipefail
+
+here=$(dirname "$(readlink -f "$0")")
+target="$HOME/.config/omarchy/branding/screensaver.txt"
+state_dir="$HOME/.local/state/omarchy/adrian.screensaver"
+state="$state_dir/word"
+
+mkdir -p "$(dirname "$target")" "$state_dir"
+
+if [[ ${1:-} == --reset ]]; then
+  cp "${OMARCHY_PATH:-/usr/share/omarchy}/logo.txt" "$target"
+  rm -f "$state"
+  exit 0
+fi
+
+text="${*:-}"
+"$here/render-word" --out "$target" "$text"
+printf '%s\n' "$text" >"$state"

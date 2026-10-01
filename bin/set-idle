@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Set idle.screensaver and idle.lock in ~/.config/omarchy/shell.json atomically.
+
+Usage: set-idle <screensaver-seconds> <lock-seconds>
+"""
+import json
+import os
+import sys
+import tempfile
+
+MIN_SECONDS = 10
+MAX_SECONDS = 24 * 60 * 60
+
+
+def parse(value):
+    seconds = int(value)
+    if not MIN_SECONDS <= seconds <= MAX_SECONDS:
+        raise ValueError(f"{seconds} is outside {MIN_SECONDS}..{MAX_SECONDS}")
+    return seconds
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit(__doc__.strip())
+    screensaver, lock = parse(sys.argv[1]), parse(sys.argv[2])
+
+    path = os.path.expanduser("~/.config/omarchy/shell.json")
+    with open(path, encoding="utf-8") as f:
+        config = json.load(f)
+
+    idle = config.setdefault("idle", {})
+    if idle.get("screensaver") == screensaver and idle.get("lock") == lock:
+        return
+    idle["screensaver"] = screensaver
+    idle["lock"] = lock
+
+    # Write next to the original and rename over it, so the shell's file
+    # watcher never sees a half-written file.
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".shell.json.")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        os.chmod(tmp, os.stat(path).st_mode & 0o777)
+        os.replace(tmp, path)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+
+
+if __name__ == "__main__":
+    main()

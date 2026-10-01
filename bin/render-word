@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""Render a word in the Omarchy logo's lettering.
+
+Usage: render-word [--out FILE] <text>
+
+The Omarchy logo is drawn in a hand-tuned, narrower cut of the FIGlet font
+"Delta Corps Priest 1": 3-column gaps instead of 4, and its own M, A, R, C, H
+and Y. Those letters are lifted straight from $OMARCHY_PATH/logo.txt, a few
+are redrawn by hand (CUSTOM_LETTERS), and every other letter comes from the
+FIGlet font, narrowed by one column the same way.
+The font only has letters, so other characters are dropped (spaces stay).
+"""
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FIGLET_FONT = os.path.join(HERE, "..", "fonts", "DeltaCorpsPriest1.flf")
+LOGO = os.path.join(os.environ.get("OMARCHY_PATH", "/usr/share/omarchy"), "logo.txt")
+
+# Column ranges of each letter in logo.txt.
+LOGO_LETTERS = {"O": (0, 9), "M": (11, 26), "A": (27, 37), "R": (38, 48),
+                "C": (50, 59), "H": (59, 71), "Y": (72, 81)}
+# Letters redrawn by hand where the FIGlet font's own glyph doesn't fit the
+# logo's style (3-column strokes, tapered stem ends).
+CUSTOM_LETTERS = {
+    "T": ["",
+          "▄█████████▄",
+          "▀▀▀▀███▀▀▀▀",
+          "    ███",
+          "    ███",
+          "    ███",
+          "    ███",
+          "    ███",
+          "    █▀",
+          ""],
+    "N": ["",
+          "███▄▄▄▄",
+          "███▀▀▀██▄",
+          "███   ███",
+          "███   ███",
+          "███   ███",
+          "███   ███",
+          "███   ███",
+          " ▀█   █▀",
+          ""],
+    "P": ["",
+          " ▄███████",
+          "███   ███",
+          "███   ███",
+          "███▄▄▄██▀",
+          "███▀▀▀▀",
+          "███",
+          "███",
+          "█▀",
+          ""],
+    "J": ["",
+          "      ▄█",
+          "      ███",
+          "      ███",
+          "      ███",
+          "      ███",
+          "▄██   ███",
+          "███   ███",
+          " ▀█████▀",
+          ""],
+}
+# Letters whose low hook would otherwise tuck under the letter before them.
+FULL_WIDTH = {"J"}
+HEIGHT = 10  # logo rows: one cap row above the letters, one descender row below
+WORD_GAP = 4
+MAX_LINE_WIDTH = 110  # wider than this and each word goes on its own line
+
+
+def pad(rows):
+    width = max((len(r) for r in rows), default=0)
+    return [r.ljust(width) for r in rows]
+
+
+def trim(rows):
+    rows = pad(rows)
+    while rows[0] and all(r[0] == " " for r in rows):
+        rows = [r[1:] for r in rows]
+    while rows[0] and all(r[-1] == " " for r in rows):
+        rows = [r[:-1] for r in rows]
+    return rows
+
+
+def load_figlet(path):
+    with open(path, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    header = lines[0].split()
+    hardblank, height, comment_lines = header[0][-1], int(header[1]), int(header[5])
+    glyphs, pos = {}, 1 + comment_lines
+    for code in range(32, 127):
+        rows = lines[pos:pos + height]
+        pos += height
+        endmark = rows[-1].rstrip()[-1]
+        rows = [r.rstrip().rstrip(endmark).replace(hardblank, " ") for r in rows]
+        if any(r.strip() for r in rows):
+            glyphs[chr(code)] = rows
+    return glyphs
+
+
+def narrow(rows):
+    """Drop the most central column that only shortens a blank gap or a run of
+    one repeated block, turning the font's 4-wide gaps into the logo's 3."""
+    rows = trim(rows)
+    width = len(rows[0])
+
+    def removable(c):
+        for r in rows:
+            here, left, right = r[c], r[c - 1], r[c + 1]
+            if here == " ":
+                if left != " " and right != " ":
+                    return False
+            elif here != left:
+                return False
+        return True
+
+    candidates = [c for c in range(1, width - 1) if removable(c)]
+    if not candidates:
+        return rows
+    c = min(candidates, key=lambda c: abs(c - width / 2))
+    return [r[:c] + r[c + 1:] for r in rows]
+
+
+def load_glyphs():
+    glyphs = {}
+    for ch, rows in load_figlet(FIGLET_FONT).items():
+        if ch.isalpha() and ch.isupper():
+            glyphs[ch] = [""] + narrow(rows)  # add the logo's cap row
+    glyphs.update(CUSTOM_LETTERS)
+    try:
+        with open(LOGO, encoding="utf-8") as f:
+            logo = pad(f.read().splitlines()[:HEIGHT])
+        for ch, (a, b) in LOGO_LETTERS.items():
+            letter = trim([r[a:b] for r in logo])
+            if any(r.strip() for r in letter):
+                glyphs[ch] = letter
+    except OSError:
+        pass
+    return {ch: pad((rows + [""] * HEIGHT)[:HEIGHT]) for ch, rows in glyphs.items()}
+
+
+def core(rows):
+    """Columns of a glyph's main strokes: the outermost columns with a full block
+    in at least three rows. Crossbars and serifs that stick out don't count."""
+    cols = [c for c in range(len(rows[0])) if sum(r[c] == "█" for r in rows) >= 3]
+    return (cols[0], cols[-1]) if cols else (0, len(rows[0]) - 1)
+
+
+def place(canvas, glyph, x):
+    canvas = [r.ljust(x) for r in canvas]
+    rows = []
+    for crow, grow in zip(canvas, glyph):
+        under = crow[x:x + len(grow)].ljust(len(grow))
+        cells = "".join(g if g != " " else u for u, g in zip(under, grow))
+        rows.append(crow[:x] + cells + crow[x + len(grow):])
+    return rows
+
+
+def collides(canvas, glyph, x):
+    """True if the glyph would touch existing ink (needs one blank column)."""
+    for crow, grow in zip(canvas, glyph):
+        ink = [i for i, c in enumerate(grow) if c != " "]
+        if not ink:
+            continue
+        lo, hi = x + ink[0] - 1, x + ink[-1] + 1
+        if any(c != " " for c in crow[max(lo, 0):hi + 1]):
+            return True
+    return False
+
+
+def render_line(words, glyphs):
+    """Set letters the way the logo is spaced: main strokes two columns apart,
+    with sticking-out parts allowed to come within one column of a neighbour."""
+    canvas = [""] * HEIGHT
+    last_core = None
+    for i, word in enumerate(words):
+        for j, ch in enumerate(word):
+            glyph = glyphs[ch]
+            lo, hi = core(glyph)
+            if ch in FULL_WIDTH:
+                lo = 0
+            if last_core is None:
+                x = 0
+            else:
+                gap = 3 + (WORD_GAP if j == 0 else 0)
+                x = max(0, last_core + gap - lo)
+                while collides(canvas, glyph, x):
+                    x += 1
+            canvas = place(canvas, glyph, x)
+            last_core = x + hi
+    return pad(canvas)
+
+
+def render(text):
+    glyphs = load_glyphs()
+    words = ["".join(ch for ch in w.upper() if ch in glyphs) for w in text.split()]
+    words = [w for w in words if w]
+    if not words:
+        raise ValueError("no letters to render (the font only has A-Z)")
+
+    lines = [render_line(words, glyphs)]
+    if len(lines[0][0]) > MAX_LINE_WIDTH and len(words) > 1:
+        lines = [render_line([w], glyphs) for w in words]
+
+    # Centre each line block against the widest one.
+    width = max(len(block[0]) for block in lines)
+    rows = []
+    for i, block in enumerate(lines):
+        if i:
+            rows.append("")
+        indent = (width - len(block[0])) // 2
+        rows.extend(" " * indent + r for r in block)
+    rows = [r.rstrip() for r in rows]
+    while rows and not rows[0]:
+        rows.pop(0)
+    while rows and not rows[-1]:
+        rows.pop()
+    return "\n".join(rows) + "\n"
+
+
+def main(argv):
+    out = None
+    if len(argv) >= 2 and argv[0] == "--out":
+        out, argv = argv[1], argv[2:]
+    if not argv:
+        sys.exit(__doc__.strip())
+    try:
+        art = render(" ".join(argv))
+    except ValueError as e:
+        sys.exit(f"render-word: {e}")
+    if out is None:
+        sys.stdout.write(art)
+        return
+    tmp = out + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(art)
+    os.replace(tmp, out)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

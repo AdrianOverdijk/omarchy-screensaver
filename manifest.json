@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "adrian.screensaver",
+  "name": "Screensaver",
+  "version": "1.0.0",
+  "author": "adrian",
+  "description": "Shows and adjusts when the screensaver starts and when the screen locks.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "Widget.qml" },
+  "barWidget": {
+    "displayName": "Screensaver",
+    "description": "Screensaver and lock timing at a glance; click to adjust",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
