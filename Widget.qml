@@ -31,6 +31,15 @@ BarWidget {
   property bool stayAwake: false
   property bool popupOpen: false
 
+  // The word can also be changed outside the popup (bin/set-word), so read
+  // it fresh each time the popup opens and drop any stale status message.
+  onPopupOpenChanged: {
+    if (!popupOpen) return
+    wordMessage = ""
+    wordError = false
+    wordFile.reload()
+  }
+
   // Values the +/- buttons step through.
   readonly property var steps: [15, 30, 45, 60, 90, 120, 150, 180, 240, 300, 420, 600,
                                 900, 1200, 1800, 2700, 3600, 5400, 7200]
