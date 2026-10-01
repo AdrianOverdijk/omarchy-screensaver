@@ -25,6 +25,29 @@ Changes are written to `idle.screensaver` / `idle.lock` in
 `~/.config/omarchy/shell.json` by `bin/set-idle` (atomic replace, nothing else
 in the file is touched). The lock is never allowed before the screensaver.
 
+## How caffeine works
+
+The widget doesn't run its own caffeine: it's a switch for Omarchy's built-in
+stay-awake. Clicking it runs `omarchy-toggle-idle`, which creates or removes
+`~/.local/state/omarchy/indicators/stay-awake`. Omarchy's idle service (part of
+`omarchy-shell`) skips the screensaver and lock while that file exists.
+
+That means:
+
+- **It doesn't need the widget to keep working.** Once on, stay-awake stays on
+  after closing the popup, restarting the shell, or removing the widget, since
+  it's just a file.
+- **Everything stays in sync.** The widget, `omarchy toggle idle`, and
+  Omarchy's own stay-awake indicator all flip the same switch.
+- **It only pauses the automatic screensaver and lock.** You can still lock the
+  screen manually.
+- **It needs Omarchy.** It won't work on a system without it.
+
+## Requirements
+
+Only what Omarchy already ships: `omarchy-shell`, `omarchy-toggle-idle`,
+`omarchy-launch-screensaver`, and `python3`. Nothing else to install.
+
 ## Screensaver lettering
 
 `bin/render-word` draws text in the Omarchy logo's lettering: a narrowed cut of
