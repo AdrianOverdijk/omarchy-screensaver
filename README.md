@@ -30,6 +30,10 @@ The widget lands in the right section of the bar.
   sync with `omarchy toggle idle` and the bar's stay-awake indicator. No
   separate caffeine widget needed.
 - **Hover**: current timings.
+- **Bar out of the way**: while the screensaver is showing, the bar is hidden
+  and comes back when the screensaver closes. (The screensaver runs on a
+  special workspace, where Hyprland would otherwise draw the bar on top of it.)
+  A bar you hid yourself stays hidden.
 - **Escape** or a click outside closes the popup.
 
 Changes are written to `idle.screensaver` / `idle.lock` in
@@ -42,6 +46,12 @@ Move the widget to another part of the bar:
 
 ```sh
 omarchy bar move io.github.adrianoverdijk.screensaver --section center
+```
+
+Keep the bar visible on the screensaver by turning off the bar hiding:
+
+```sh
+omarchy bar set io.github.adrianoverdijk.screensaver hideBarOnScreensaver false --json
 ```
 
 Open, close or toggle the popup from a terminal or a keybinding:

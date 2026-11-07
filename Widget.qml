@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import qs.Commons
 import qs.Ui
@@ -195,6 +196,51 @@ BarWidget {
     id: stayAwakeRefresh
     interval: 300
     onTriggered: stayAwakeFile.reload()
+  }
+
+  // ------------------------------------------- hide the bar on the screensaver
+  // The screensaver runs fullscreen on a special workspace, and Hyprland draws
+  // the bar's layer above special workspaces, so the bar stays on top of it.
+  // Hide the bar while a screensaver window is open and bring it back once the
+  // last one closes. A bar the user hid themselves is left alone.
+  // Turn off with "hideBarOnScreensaver": false on this widget in shell.json.
+  readonly property string screensaverClass: "org.omarchy.screensaver"
+  property bool hidBar: false
+
+  // The bar has one instance of this widget per monitor; only the first acts.
+  function isLeader() {
+    var items = bar && typeof bar.moduleWidgets === "function" ? bar.moduleWidgets(moduleName) : [root]
+    return items.length === 0 || items[0] === root
+  }
+
+  Connections {
+    target: Hyprland
+    function onRawEvent(event) {
+      if (!event) return
+      var name = String(event.name)
+      if (name === "openwindow") {
+        if (String(event.data).split(",")[2] !== root.screensaverClass) return
+        if (root.hidBar || !root.setting("hideBarOnScreensaver", true) || !root.isLeader()) return
+        if (root.bar && root.bar.barHidden) return
+        root.hidBar = true
+        Quickshell.execDetached(["omarchy-toggle-bar", "on"])
+      } else if (name === "closewindow" && root.hidBar) {
+        screensaverCheck.running = true
+      }
+    }
+  }
+
+  // Exits 0 while any screensaver window is still open.
+  Process {
+    id: screensaverCheck
+    command: ["/bin/bash", "-c",
+              "hyprctl clients -j | jq -e --arg c \"$1\" 'any(.[]; .class == $c)' >/dev/null",
+              "check", root.screensaverClass]
+    onExited: function(exitCode) {
+      if (exitCode === 0 || !root.hidBar) return
+      root.hidBar = false
+      Quickshell.execDetached(["omarchy-toggle-bar", "off"])
+    }
   }
 
   function previewScreensaver() {
