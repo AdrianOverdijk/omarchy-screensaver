@@ -23,7 +23,8 @@ The widget lands in the right section of the bar.
   Stay awake, Preview, and Defaults (2:30 / 5:00).
 - **Screensaver text**: type a word and press Enter (or Apply) to show it on
   the screensaver instead of the logo, in the same lettering as the Omarchy
-  logo. **Logo** puts the stock logo back.
+  logo. Emoji codes such as `:)`, `:h` (heart) and `:s` (star) work too; see
+  [Screensaver lettering](#screensaver-lettering). **Logo** puts the stock logo back.
 - **Caffeine (stay awake)**: right-click the icon, or use the **Stay awake**
   button in the popup. The icon turns into a coffee cup while it's on, and both
   timers are paused. It uses Omarchy's own stay-awake setting, so it stays in
@@ -107,12 +108,26 @@ P redrawn by hand to match. Rendering
 `omarchy` reproduces the logo exactly. Only A–Z exist in the font; other
 characters are dropped. Long text is split one word per line.
 
+Emoji are typed as short codes (case doesn't matter, `:-)` works too) and drawn
+in the same heavy blocks:
+
+| Code | Emoji | Code | Emoji |
+|------|-------|------|-------|
+| `:)` | smiley | `:h` | heart |
+| `:(` | sad | `:s` | star |
+| `:/` | unsure | `:c` | coffee |
+| `:D` | big grin | `:m` | moon |
+| `;)` | wink | `:z` | sleep (zzz) |
+| `:O` | surprised | `:n` | music note |
+| | | `:b` | lightning bolt |
+
 `bin/set-word` writes the result to `~/.config/omarchy/branding/screensaver.txt`
 (the file `omarchy branding screensaver` also edits) and remembers the word in
 `~/.local/state/omarchy/io.github.adrianoverdijk.screensaver/word`.
 
     bin/render-word "be right back"     # print it
     bin/set-word "be right back"        # use it
+    bin/set-word "back soon :c"         # with a coffee cup
     bin/set-word --reset                # back to the logo
 
 ## Development

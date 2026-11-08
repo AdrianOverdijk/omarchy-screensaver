@@ -501,8 +501,8 @@ BarWidget {
         width: parent.width
         wrapMode: Text.WordWrap
         text: root.wordMessage !== "" ? root.wordMessage
-          : (root.word !== "" ? "Showing “" + root.word.toUpperCase() + "” · letters A–Z only"
-                              : "Showing the Omarchy logo · letters A–Z only")
+          : (root.word !== "" ? "Showing “" + root.word.toUpperCase() + "” · A–Z, emoji like :) :h :s"
+                              : "Showing the Omarchy logo · A–Z, emoji like :) :h :s")
         color: root.wordError ? Color.urgent : root.popupMuted
         font.family: root.fontFamily
         font.pixelSize: Style.font.caption
