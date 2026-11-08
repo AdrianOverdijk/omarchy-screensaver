@@ -501,11 +501,42 @@ BarWidget {
         width: parent.width
         wrapMode: Text.WordWrap
         text: root.wordMessage !== "" ? root.wordMessage
-          : (root.word !== "" ? "Showing “" + root.word.toUpperCase() + "” · A–Z, emoji like :) :h :s"
-                              : "Showing the Omarchy logo · A–Z, emoji like :) :h :s")
+          : (root.word !== "" ? "Showing “" + root.word.toUpperCase() + "”"
+                              : "Showing the Omarchy logo")
         color: root.wordError ? Color.urgent : root.popupMuted
         font.family: root.fontFamily
         font.pixelSize: Style.font.caption
+      }
+
+      Text {
+        width: parent.width
+        wrapMode: Text.WordWrap
+        text: "Letters A–Z, plus these emoji codes:"
+        color: root.popupMuted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+      }
+
+      // Same codes as EMOJI in bin/render-word.
+      Flow {
+        width: parent.width
+        spacing: Style.space(10)
+
+        Repeater {
+          model: [[":)", "smiley"], [":(", "sad"], [":/", "unsure"], [":D", "grin"],
+                  [";)", "wink"], [":O", "surprised"], [":h", "heart"], [":s", "star"],
+                  [":c", "coffee"], [":m", "moon"], [":z", "zzz"], [":n", "note"],
+                  [":b", "bolt"]]
+
+          Text {
+            required property var modelData
+            textFormat: Text.StyledText
+            text: "<b>" + modelData[0] + "</b> " + modelData[1]
+            color: root.popupMuted
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+        }
       }
 
       Flow {
